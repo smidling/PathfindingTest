@@ -30,4 +30,10 @@ public class PathfindingNode
             return gCost + hCost;
         }
     }
+
+    public PathfindingNode CopyNode()
+    {
+        PathfindingNode result = new PathfindingNode(walkable,gridX,gridY);
+        return result;
+    }
 }

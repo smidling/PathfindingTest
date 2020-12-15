@@ -58,6 +58,7 @@ public class SettingsMenuCtrl : MonoBehaviour
 
     void OnEnable()
     {
+        debugEnabled = debugToggle.isOn;
         musicToggle.isOn = PlayerPrefs.GetInt("MusicOn", 1) == 1;
         soundsToggle.isOn = PlayerPrefs.GetInt("SoundOn", 1) == 1;
         levelSizeSlider.value = PlayerPrefs.GetFloat("LevelSize", 1);

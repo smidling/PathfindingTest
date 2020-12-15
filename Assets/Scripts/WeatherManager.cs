@@ -32,10 +32,9 @@ public class WeatherManager : MonoBehaviour {
 		} else if (currentWeather == "Clear") {
 			SpawnSunny ();
 		}
-        //todo testiram dal ce ista da napise
-//        else {
-//            SpawnCloudy();
-//        }
+        else {
+            SpawnCloudy();
+        }
 	}
 
 	void SpawnRain () {

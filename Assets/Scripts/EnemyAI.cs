@@ -14,6 +14,12 @@ public class EnemyAI : MonoBehaviour
     private int nextNodeIter = 0;
     private float distancePonder = 0.02f;
 
+    private bool pathfindingActive = false;
+    private bool pathfindingStarted = false;
+    private int myNum = 0;
+    private PathfindingAlgorithm myPathfindingAlgorithm;
+    private PathfindingNode myStartNode;
+
 
     [SerializeField]
     private float shootTimeout = 1f; // second 
@@ -30,6 +36,33 @@ public class EnemyAI : MonoBehaviour
 
     private void FixedUpdate()
     {
+        // pathfinding
+        if (pathfindingActive)
+        {
+            pathfindingActive = !myPathfindingAlgorithm.PathfindingStep();
+            if (SettingsMenuCtrl.Instance.DebugEnabled)
+            {
+                // draw search pattern gizmos
+                GameMenuCtrl.Instance.DrawNodeWidgets(myNum, myPathfindingAlgorithm.GetClosedSet());
+                GameMenuCtrl.Instance.DrawNodeWidgets(myNum, myPathfindingAlgorithm.GetOpenSet());
+            }
+        }
+        if (!pathfindingActive && pathfindingStarted)
+        {
+            myPath = myPathfindingAlgorithm.GetPath();
+            if (myPath != null)
+            {
+                if (SettingsMenuCtrl.Instance.DebugEnabled)
+                {
+                    LevelGenerator.Instance.DrawPath(myNum, myPath, myStartNode);
+                }
+                // two iteration moves
+                distancePonder = speed*Time.fixedDeltaTime;
+                startMoving = true;
+            }
+            pathfindingStarted = false;
+        }
+
         // shooting part
         int raycastMask = LayerMask.GetMask("Enemy");
         raycastMask = ~raycastMask;
@@ -80,6 +113,21 @@ public class EnemyAI : MonoBehaviour
     }
 
 
+    public void StartPathfinding(bool randAlgorithm, int enemyNum, PathfindingNode startNode, PathfindingNode goalNode)
+    {
+        myStartNode = startNode;
+        myNum = enemyNum; ;
+        if (randAlgorithm)
+            myPathfindingAlgorithm = new Pathfinding_greedy();
+        else
+            myPathfindingAlgorithm = new Pathfinding_aStar();
+
+        
+        myPathfindingAlgorithm.StartPathfindingSteps(LevelGenerator.Instance, startNode, goalNode);
+        pathfindingActive = true;
+        pathfindingStarted = true;
+    }
+    
     IEnumerator Shoot(Vector3 direction)
     {
         yield return new WaitForSeconds(shootTimeout / 2);

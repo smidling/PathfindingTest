@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 
@@ -38,7 +39,7 @@ public class LevelGenerator : MonoBehaviour
     private List<PathfindingNode> path;
     private PathfindingNode[,] levelNodes;
     
-    private const int enemyCount = 4;
+    private const int enemyCount = 4; 
     private int levelSize = 20;
     private int levelDensity = 50;
 
@@ -71,7 +72,7 @@ public class LevelGenerator : MonoBehaviour
 
     public void StartTheGame()
     {
-        Time.timeScale = 0;
+//        Time.timeScale = 0;
         SettingsMenuCtrl.Instance.RefreshSettings();
         GenerateLevel(levelSize);
         Camera.main.cullingMask ^=
@@ -85,7 +86,7 @@ public class LevelGenerator : MonoBehaviour
         if (!gameCamera)
             gameCamera = Camera.main;
         if(gameCamera)
-            gameCamera.orthographicSize = (size+2)/2f * 1920 / 1080 / Screen.width * Screen.height;
+            gameCamera.orthographicSize = size/2f * 1920 / 1080 / Screen.width * Screen.height;
         startPoint = Vector2.one * levelSize / 2 * -1;
         
         levelNodes = new PathfindingNode[size, size];
@@ -161,41 +162,36 @@ public class LevelGenerator : MonoBehaviour
             // spawn enemy
             enemiesGos.Add(GameObject.Instantiate(randAlgorithm ? enemyPrefabs[1] : enemyPrefabs[0],
                 new Vector3(hor, ver, 0), new Quaternion(), groundParentTr));
-
-            // assign algorithm to enemy
-            // todo implement new algorithms here
-            PathfindingAlgorithm tempPathfind;
-            if (randAlgorithm)
-                tempPathfind = new Pathfinding_greedy();
-            else
-                tempPathfind = new Pathfinding_aStar();
             
-            List<PathfindingNode> myPath = tempPathfind.FindPath(
-                this, levelNodes[hor, ver], GetNode(baseGO.transform));
-            
-            // give the path to AI
+            // start enemy pathfinding
             EnemyAI tempAi = enemiesGos[iter].GetComponent<EnemyAI>();
-            tempAi.SetPath(myPath);
-
-            // Debug view widgets
-            if (SettingsMenuCtrl.Instance.DebugEnabled)
-            {
-                // draw search pattern gizmos
-                GameMenuCtrl.Instance.DrawNodeWidgets(iter, tempPathfind.GetClosedSet());
-                GameMenuCtrl.Instance.DrawNodeWidgets(iter, tempPathfind.GetOpenSet());
-
-                // draw lines
-                lineRenderers[iter].positionCount = myPath.Count + 1;
-                int nodeIter = 0;
-                lineRenderers[iter].SetPosition(nodeIter++, GetWorldPos(levelNodes[hor, ver]) + Vector3.one/2f);
-                foreach (var node in myPath)
-                {
-                    lineRenderers[iter].SetPosition(nodeIter++, GetWorldPos(node) + Vector3.one/2f);
-                }
+            tempAi.StartPathfinding(randAlgorithm, iter, levelNodes[hor, ver], GetNode(baseGO.transform));
             }
-        }
         // center playing field 
         groundParentTr.position = new Vector3(startPoint.x, startPoint.y, 0);
+    }
+
+    private float pathfindingStep = 0.1f;
+
+
+    public void DrawPath(int enemyNum, List<PathfindingNode> myPath, PathfindingNode startNode )
+    {
+        StartCoroutine(DrawPathSequental(enemyNum, myPath, startNode));
+    }
+
+    IEnumerator DrawPathSequental(int enemyNum, List<PathfindingNode> myPath, PathfindingNode startNode)
+    {
+        // draw lines
+        int nodeIter = 0;
+        // brute overide to for line to start from enemy
+        lineRenderers[enemyNum].positionCount = 1;
+        lineRenderers[enemyNum].SetPosition(nodeIter++, GetWorldPos(startNode) + Vector3.one / 2f);
+        foreach (var node in myPath)
+        {
+            yield return new WaitForSeconds(0.1f);
+            lineRenderers[enemyNum].positionCount = nodeIter + 1;
+            lineRenderers[enemyNum].SetPosition(nodeIter++, GetWorldPos(node) + Vector3.one / 2f);
+        }
     }
     
     public PathfindingNode GetNode(Transform goPos)
@@ -208,27 +204,17 @@ public class LevelGenerator : MonoBehaviour
         return new Vector3(node.gridX, node.gridY, 0f);
     }
     
-    public List<PathfindingNode> GetNeighbours(PathfindingNode node)
+
+    public PathfindingNode[,] CopyLevelNodes()
     {
-        List<PathfindingNode> neighbours = new List<PathfindingNode>();
-        for (int x = -1; x <= 1; x++)
-        {
-            for (int y = -1; y <= 1; y++)
+        PathfindingNode[,] newArrayNodes = new PathfindingNode[LevelSize, LevelSize];
+        //        newArrayNodes = levelNodes.Clone() as PathfindingNode[,];
+        for (int y = 0; y < LevelSize; y++) {
+            for (int x = 0; x < LevelSize; x++)
             {
-                if (x == 0 && y == 0)
-                    continue;
-                if (Mathf.Abs(x) + Mathf.Abs(y) == 2)
-                    continue;
-
-                int checkX = node.gridX + x;
-                int checkY = node.gridY + y;
-
-                if (checkX >= 0 && checkX < levelSize && checkY >= 0 && checkY < levelSize)
-                {
-                    neighbours.Add(levelNodes[checkX, checkY]);
-                }
+                newArrayNodes[x, y] = levelNodes[x, y].CopyNode();
             }
         }
-        return neighbours;
+        return newArrayNodes;
     }
 }

@@ -16,6 +16,12 @@ public class MainMenuCtrl : MonoBehaviour
         Canvas.ForceUpdateCanvases();
     }
 
+    void Update()
+    {
+        if(Input.GetKey(KeyCode.Space))
+            ButtonClickedStart();
+    }
+
 
     public void ButtonClickedStart()
     {

@@ -38,14 +38,12 @@ public class GameMenuCtrl : MonoBehaviour
     private GridLayoutGroup algorithmViewGrid;
     [SerializeField]
     private GameObject algorithmViewNodePrefab;
-    [SerializeField]
-    private GameObject[] ViewNodePrefab;
 
     [Header("Debug data")]
     [Space(5)]
 
     [SerializeField]
-    private GridLayoutGroup[,] algorithmViewNodes;
+    private ViewNodeCtrl[,] algorithmViewNodes;
     private bool shoot = false;
 
     private bool listInitiated = false;
@@ -67,10 +65,10 @@ public class GameMenuCtrl : MonoBehaviour
 
     void OnEnable()
     {
-        if (SettingsMenuCtrl.Instance.DebugEnabled && !listInitiated)
-        {
-            InitListNodes();
-        }
+//        if (SettingsMenuCtrl.Instance.DebugEnabled && !listInitiated)
+//        {
+//            InitListNodes();
+//        }
 
         // start the game
         Time.timeScale = 1; 
@@ -78,54 +76,52 @@ public class GameMenuCtrl : MonoBehaviour
 
     private void InitListNodes()
     {
-        try
-        {
             int size = LevelGenerator.Instance.LevelSize;
-            algorithmViewNodes = new GridLayoutGroup[size, size];
-            horizontalLayoutGroup.spacing = 1080f / (size + 2) - 2f; // hardcode for debug purposs
-            verticalLayoutGroup.spacing = 1080f / (size + 2) - 2f;
-            algorithmViewGrid.cellSize = Vector2.one * 1080f / (size + 2);
-            for (int iter = -1; iter <= size; iter++)
+            algorithmViewNodes = new ViewNodeCtrl[size, size];
+            horizontalLayoutGroup.spacing = 1080f / size - 2f; // hardcode for debug purposs
+            verticalLayoutGroup.spacing = 1080f / size - 2f;
+            algorithmViewGrid.cellSize = Vector2.one * 1080f / size ;
+
+        GameObject.Instantiate(linePrefab, new Vector3(), new Quaternion(), verticalLayoutGroup.transform);
+        GameObject.Instantiate(linePrefab, new Vector3(), new Quaternion(), horizontalLayoutGroup.transform);
+        for (int iter = 0; iter < size; iter++)
             {
                 GameObject.Instantiate(linePrefab, new Vector3(), new Quaternion(), verticalLayoutGroup.transform);
                 GameObject.Instantiate(linePrefab, new Vector3(), new Quaternion(), horizontalLayoutGroup.transform);
-                for (int iter2 = -1; iter2 <= size; iter2++)
+                for (int iter2 = 0; iter2 < size; iter2++)
                 {
                     GameObject go = Instantiate(algorithmViewNodePrefab, new Vector3(), new Quaternion(),
                         algorithmViewGrid.transform);
-                    go.GetComponent<GridLayoutGroup>().cellSize = Vector2.one * 1080f / (size + 2) / 2f;
-                    if (!(iter == -1 || iter == size || iter2 == -1 || iter2 == size))
-                        algorithmViewNodes[iter2, iter] = go.GetComponent<GridLayoutGroup>();
-                    //                    algorithmViewNodes[iter2, iter].cellSize = Vector2.one * 1080f / (size + 2) / 2f;
+                    go.GetComponent<GridLayoutGroup>().cellSize = Vector2.one * 1080f / size / 2f;
+//                    if (!(iter == -1 || iter >= size || iter2 == -1 || iter2 >= size))
+                        algorithmViewNodes[iter2, iter] = go.GetComponent<ViewNodeCtrl>();
                 }
             }
-        }
-        catch
-        {
-            // debug option, doesnt matter
-            Debug.LogWarning("UI line grid not instantiated");
-        }
         listInitiated = true;
     }
 
+    public void DrawNodeWidgets(int enemyNum, int x, int y)
+    {
+        if (!listInitiated)
+            InitListNodes();
+        algorithmViewNodes[x, y].ActivateImage(enemyNum);
+    }
     public void DrawNodeWidgets(int enemyNum, HashSet<PathfindingNode> nodes)
     {
         if(!listInitiated)
             InitListNodes();
         foreach (PathfindingNode node in nodes)
         {
-            Instantiate(ViewNodePrefab[enemyNum], new Vector3(), new Quaternion(),
-                        algorithmViewNodes[node.gridX, node.gridY].transform);
+            algorithmViewNodes[node.gridX, node.gridY].ActivateImage(enemyNum);
         }
     }
     public void DrawNodeWidgets(int enemyNum, List<PathfindingNode> nodes)
     {
         if (!listInitiated)
             InitListNodes();
-        foreach (PathfindingNode node in nodes)
+        for (int index = 0; index < nodes.Count; index++)
         {
-            Instantiate(ViewNodePrefab[enemyNum], new Vector3(), new Quaternion(),
-                        algorithmViewNodes[node.gridX, node.gridY].transform);
+            algorithmViewNodes[nodes[index].gridX, nodes[index].gridY].ActivateImage(enemyNum);
         }
     }
 

@@ -88,8 +88,8 @@ public class GetMyWeather : MonoBehaviour
             float finalTemp = Mathf.Round((tempTemp - 273.0f) * 10) / 10; //holds the actual converted temperature
 
             int.TryParse(N["weather"][0]["id"].Value, out conditionID); //get the current condition ID
-            //conditionName = N["weather"][0]["main"].Value; //get the current condition Name
-            conditionName = N["weather"][0]["description"].Value; //get the current condition Description
+            conditionName = N["weather"][0]["main"].Value; //get the current condition Name
+//            conditionName = N["weather"][0]["description"].Value; //get the current condition Description
             conditionImage = N["weather"][0]["icon"].Value; //get the current condition Image
 
             //put all the retrieved stuff in the label
