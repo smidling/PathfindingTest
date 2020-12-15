@@ -6544,7 +6544,7 @@ GameObject:
   m_Component:
   - component: {fileID: 502045985}
   - component: {fileID: 502045984}
-  m_Layer: 14
+  m_Layer: 0
   m_Name: LineRenderer1 (2)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -14097,7 +14097,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1222648346}
   - component: {fileID: 1222648345}
-  m_Layer: 14
+  m_Layer: 0
   m_Name: LineRenderer1 (4)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -15177,7 +15177,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1481024748}
   - component: {fileID: 1481024747}
-  m_Layer: 14
+  m_Layer: 0
   m_Name: LineRenderer1 (3)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -15527,7 +15527,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1527571150}
   - component: {fileID: 1527571149}
-  m_Layer: 14
+  m_Layer: 0
   m_Name: LineRenderer1 (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
